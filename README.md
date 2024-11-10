@@ -4,6 +4,7 @@ A web server in Go that exposes a REST API for generating a customizable FizzBuz
 
 ## Prerequisites
 - Go 1.22 or later
+- golangci-lint (required for linting)
 
 ## Installation
 
@@ -13,6 +14,36 @@ Clone the repository and initialize dependencies:
 git clone https://github.com/Dmouri/lbc-fizzbuzz
 cd lbc-fizzbuzz
 go mod tidy
+```
+
+## Usage
+
+You can use the provided Makefile to manage building, running, testing, and linting the application:
+
+- **Build the application**:
+```sh
+  make build
+```
+
+- **Run the application**:
+```sh
+  make run
+```
+
+- **Run tests with coverage**:
+```sh
+  make test
+```
+
+- **Lint the code**:
+  Ensure `golangci-lint` is installed, then run:
+```sh
+  make lint
+```
+
+- **Clean up build files**:
+```sh
+  make clean
 ```
 
 ## API Endpoints
