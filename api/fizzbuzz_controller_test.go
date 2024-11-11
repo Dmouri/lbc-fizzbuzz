@@ -2,6 +2,8 @@ package api_test
 
 import (
 	"lbc/fizzbuzz/api"
+	"lbc/fizzbuzz/internal"
+	"lbc/fizzbuzz/repository"
 	"lbc/fizzbuzz/service"
 	"net/http"
 	"net/http/httptest"
@@ -15,8 +17,9 @@ import (
 // TestFizzBuzzEndpointValidation tests input validation for FizzBuzz API
 func TestFizzBuzzEndpointValidation(t *testing.T) {
 	router := gin.Default()
-	fizzBuzzService := service.NewFizzBuzzService()
-	api.SetupFizzBuzzController(zap.NewExample(), router, fizzBuzzService)
+	fizzBuzzRepository := repository.NewFizzBuzzRepository(internal.Clients.PostgreSQL(), zap.NewExample())
+	fizzBuzzService := service.NewFizzBuzzService(fizzBuzzRepository)
+	api.SetupFizzBuzzController(zap.NewExample(), router, fizzBuzzService, fizzBuzzRepository)
 
 	tests := []struct {
 		name         string
@@ -94,8 +97,9 @@ func TestFizzBuzzEndpointValidation(t *testing.T) {
 // TestFizzBuzzEndpointResults tests the FizzBuzz API output for various valid inputs
 func TestFizzBuzzEndpointResults(t *testing.T) {
 	router := gin.Default()
-	fizzBuzzService := service.NewFizzBuzzService()
-	api.SetupFizzBuzzController(zap.NewExample(), router, fizzBuzzService)
+	fizzBuzzRepository := repository.NewFizzBuzzRepository(internal.Clients.PostgreSQL(), zap.NewExample())
+	fizzBuzzService := service.NewFizzBuzzService(fizzBuzzRepository)
+	api.SetupFizzBuzzController(zap.NewExample(), router, fizzBuzzService, fizzBuzzRepository)
 
 	tests := []struct {
 		name         string

@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"lbc/fizzbuzz/domain"
+	"lbc/fizzbuzz/repository"
 	"strconv"
 	"strings"
 
@@ -12,10 +14,14 @@ type FizzBuzzService interface {
 	GenerateFizzBuzz(input domain.FizzBuzzInput) (string, errors.Error)
 }
 
-type fizzBuzzService struct{}
+type fizzBuzzService struct {
+	fizzBuzzRepository repository.FizzBuzzRepository
+}
 
-func NewFizzBuzzService() FizzBuzzService {
-	return &fizzBuzzService{}
+func NewFizzBuzzService(fizzBuzzRepository repository.FizzBuzzRepository) FizzBuzzService {
+	return &fizzBuzzService{
+		fizzBuzzRepository: fizzBuzzRepository,
+	}
 }
 
 func (f *fizzBuzzService) GenerateFizzBuzz(input domain.FizzBuzzInput) (string, errors.Error) {
@@ -36,6 +42,10 @@ func (f *fizzBuzzService) GenerateFizzBuzz(input domain.FizzBuzzInput) (string, 
 		default:
 			result = append(result, strconv.Itoa(i))
 		}
+	}
+
+	if err := f.fizzBuzzRepository.Save(context.Background(), input); err != nil {
+		return "", errors.Wrap(err).WithKind("internal_error")
 	}
 
 	return strings.Join(result, ","), nil

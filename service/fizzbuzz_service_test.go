@@ -2,14 +2,18 @@ package service_test
 
 import (
 	"lbc/fizzbuzz/domain"
+	"lbc/fizzbuzz/internal"
+	"lbc/fizzbuzz/repository"
 	"lbc/fizzbuzz/service"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
+// TestGenerateFizzBuzz /
 func TestGenerateFizzBuzz(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -77,7 +81,8 @@ func TestGenerateFizzBuzz(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := service.NewFizzBuzzService()
+			repo := repository.NewFizzBuzzRepository(internal.Clients.PostgreSQL(), zap.NewExample())
+			svc := service.NewFizzBuzzService(repo)
 			result, err := svc.GenerateFizzBuzz(tt.input)
 
 			if tt.expectErr {
@@ -90,8 +95,10 @@ func TestGenerateFizzBuzz(t *testing.T) {
 	}
 }
 
+// TestGenerateFizzBuzz_LargeLimit /
 func TestGenerateFizzBuzz_LargeLimit(t *testing.T) {
-	svc := service.NewFizzBuzzService()
+	repo := repository.NewFizzBuzzRepository(internal.Clients.PostgreSQL(), zap.NewExample())
+	svc := service.NewFizzBuzzService(repo)
 	tests := []struct {
 		name          string
 		input         domain.FizzBuzzInput

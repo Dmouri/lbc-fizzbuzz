@@ -3,11 +3,11 @@ package domain
 import "github.com/mwm-io/gapi/errors"
 
 type FizzBuzzInput struct {
-	Int1  int    `json:"int1"`
-	Int2  int    `json:"int2"`
-	Limit int    `json:"limit"`
-	Str1  string `json:"str1"`
-	Str2  string `json:"str2"`
+	Int1  int    `json:"int1"  bun:"int1"`
+	Int2  int    `json:"int2"  bun:"int2"`
+	Limit int    `json:"limit" bun:"max_limit"`
+	Str1  string `json:"str1"  bun:"str1"`
+	Str2  string `json:"str2"  bun:"str2"`
 }
 
 func (f FizzBuzzInput) Validate() error {
@@ -36,4 +36,9 @@ func (f FizzBuzzInput) Validate() error {
 	}
 
 	return nil
+}
+
+type FizzbuzzRequest struct {
+	FizzBuzzInput
+	Hits int `bun:"hits"`
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"lbc/fizzbuzz/domain"
+	"lbc/fizzbuzz/repository"
 	"lbc/fizzbuzz/service"
 	"net/http"
 	"strconv"
@@ -12,8 +13,9 @@ import (
 )
 
 type fizzBuzzController struct {
-	fizzBuzzService service.FizzBuzzService
-	logger          *zap.Logger
+	fizzBuzzService    service.FizzBuzzService
+	fizzBuzzRepository repository.FizzBuzzRepository
+	logger             *zap.Logger
 }
 
 type FizzBuzzResponse struct {
@@ -23,14 +25,17 @@ type FizzBuzzResponse struct {
 func SetupFizzBuzzController(
 	logger *zap.Logger,
 	router gin.IRouter,
-	fizzBuzzService service.FizzBuzzService) {
+	fizzBuzzService service.FizzBuzzService,
+	fizzBuzzRepository repository.FizzBuzzRepository) {
 	c := fizzBuzzController{
-		logger:          logger,
-		fizzBuzzService: fizzBuzzService,
+		logger:             logger,
+		fizzBuzzService:    fizzBuzzService,
+		fizzBuzzRepository: fizzBuzzRepository,
 	}
 
 	root := router.Group("/api/v1/fizzbuzz")
 	GET(root, "/", c.generateFizzBuzzEndpoint)
+	GET(root, "/stats", c.getFizzBuzzStatsEndpoint)
 }
 
 // generateFizzBuzzEndpoint handles the FizzBuzz generation request
@@ -84,4 +89,16 @@ func GetQueryParams(ctx *gin.Context) (domain.FizzBuzzInput, errors.Error) {
 		Str1:  str1,
 		Str2:  str2,
 	}, nil
+}
+
+// getFizzBuzzStatsEndpoint handles the FizzBuzz stats request
+func (c *fizzBuzzController) getFizzBuzzStatsEndpoint(ctx *gin.Context) {
+	fbRequest, err := c.fizzBuzzRepository.GetMostHits(ctx)
+	if err != nil {
+		c.logger.Error("Failed to get most hits FizzBuzzRequest", zap.Error(err))
+		ctx.JSON(err.StatusCode(), gin.H{"error": err})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, fbRequest)
 }

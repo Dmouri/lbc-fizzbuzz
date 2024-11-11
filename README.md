@@ -5,6 +5,7 @@ A web server in Go that exposes a REST API for generating a customizable FizzBuz
 ## Prerequisites
 - Go 1.22 or later
 - golangci-lint (required for linting)
+- Docker (for running PostgreSQL database)
 
 ## Installation
 
@@ -16,6 +17,26 @@ cd lbc-fizzbuzz
 go mod tidy
 ```
 
+## Database Setup
+This project uses a PostgreSQL database for persisting FizzBuzz requests. Use Docker Compose to set up and initialize the database.
+
+- **Start the database**:
+```sh
+  make db-up
+```
+
+- **Initialize the database schema**:
+  This runs the `init.sql` script to create the necessary tables.
+```sh
+  make db-init
+```
+
+- **Stop the database**:
+```sh
+  make db-down
+```
+
+
 ## Usage
 
 You can use the provided Makefile to manage building, running, testing, and linting the application:
@@ -25,7 +46,7 @@ You can use the provided Makefile to manage building, running, testing, and lint
   make build
 ```
 
-- **Run the application**:
+- **Run the application** (includes starting the database if not already running):
 ```sh
   make run
 ```
@@ -71,3 +92,30 @@ curl "http://localhost:8080/api/v1/fizzbuzz?int1=3&int2=5&limit=16&str1=fizz&str
   "result": "1,2,fizz,4,buzz,fizz,7,8,fizz,buzz,11,fizz,13,14,fizzbuzz,16"
 }
 ```
+
+### FizzBuzz Statistics
+
+This endpoint retrieves the FizzBuzz query that has been requested the most, displaying the parameters with the highest number of hits.
+
+- **Endpoint**: `GET /api/v1/fizzbuzz/stats`
+- **Response**:
+  - `int1`: the integer used to replace multiples with `str1`
+  - `int2`: the integer used to replace multiples with `str2`
+  - `limit`: the upper limit of the sequence
+  - `str1`: the word replacing multiples of `int1`
+  - `str2`: the word replacing multiples of `int2`
+  - `hits`: the number of times this specific query has been requested
+
+**Example Response**:
+```json
+{
+  "int1": 3,
+  "int2": 5,
+  "limit": 100,
+  "str1": "fizz",
+  "str2": "buzz",
+  "hits": 42
+}
+```
+
+This endpoint allows you to track the most popular FizzBuzz query configurations and observe usage patterns based on request frequency.
