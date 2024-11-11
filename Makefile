@@ -10,7 +10,7 @@ db-up:
 	docker-compose up -d $(DB_CONTAINER)
 
 db-init: db-up
-	docker exec -i $(DB_CONTAINER) psql -U fizzbuzz -d fizzbuzz_db < init.sql
+	docker exec -i $(DB_CONTAINER) psql -U fizzbuzz -d fizzbuzz_db < testdata/init.sql
 
 db-down:
 	docker-compose down

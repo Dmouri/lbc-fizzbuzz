@@ -40,5 +40,5 @@ func (f FizzBuzzInput) Validate() error {
 
 type FizzbuzzRequest struct {
 	FizzBuzzInput
-	Hits int `bun:"hits"`
+	Hits int `json:"hits" bun:"hits"`
 }

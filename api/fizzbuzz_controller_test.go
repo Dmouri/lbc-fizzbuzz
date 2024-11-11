@@ -5,6 +5,7 @@ import (
 	"lbc/fizzbuzz/internal"
 	"lbc/fizzbuzz/repository"
 	"lbc/fizzbuzz/service"
+	"lbc/fizzbuzz/testdata/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -144,6 +145,42 @@ func TestFizzBuzzEndpointResults(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
+			assert.Equal(t, tt.expectedCode, w.Code)
+			assert.Contains(t, w.Body.String(), tt.expectedBody)
+		})
+	}
+}
+
+func TestGetFizzBuzzStatsEndpoint(t *testing.T) {
+	router := gin.Default()
+	db := internal.Clients.PostgreSQL()
+	fizzBuzzRepository := repository.NewFizzBuzzRepository(db, zap.NewExample())
+	fizzBuzzService := service.NewFizzBuzzService(fizzBuzzRepository)
+	api.SetupFizzBuzzController(zap.NewExample(), router, fizzBuzzService, fizzBuzzRepository)
+
+	err := utils.LoadFixtures(db)
+	assert.Nil(t, err)
+
+	tests := []struct {
+		name         string
+		url          string
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			name:         "Successful Stats Fetch",
+			url:          "/api/v1/fizzbuzz/stats",
+			expectedCode: http.StatusOK,
+			expectedBody: `"int1":3,"int2":5,"limit":100,"str1":"fizz","str2":"buzz","hits":42`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
 			assert.Equal(t, tt.expectedCode, w.Code)
 			assert.Contains(t, w.Body.String(), tt.expectedBody)
 		})

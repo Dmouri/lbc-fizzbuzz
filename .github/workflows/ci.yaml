@@ -67,7 +67,7 @@ jobs:
 
       - name: Initialize Database
         run: |
-          PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f ./init.sql
+          PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f ./testdata/init.sql
 
       - name: Run tests
         run: make test
