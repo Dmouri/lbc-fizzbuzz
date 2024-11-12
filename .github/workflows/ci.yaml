@@ -1,0 +1,73 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.54.2
+
+      - name: Verify golangci-lint installation
+        run: golangci-lint --version
+
+      - name: Run linter
+        run: golangci-lint run ./api/... ./service/... ./repository/...
+
+      - name: Install dependencies
+        run: make deps
+
+      - name: Run linter
+        run: make lint
+
+      - name: Build application
+        run: make build
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      db:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: fizzbuzz_db
+          POSTGRES_USER: fizzbuzz
+          POSTGRES_PASSWORD: fizzbuzz_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U fizzbuzz"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: fizzbuzz
+      DB_PASSWORD: fizzbuzz_password
+      DB_NAME: fizzbuzz_db
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+            echo "Waiting for PostgreSQL..."
+            sleep 5
+          done
+
+      - name: Initialize Database
+        run: |
+          PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f ./testdata/init.sql
+
+      - name: Run tests
+        run: make test

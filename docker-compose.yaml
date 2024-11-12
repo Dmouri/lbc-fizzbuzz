@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: fizzbuzz_db
+      POSTGRES_USER: fizzbuzz
+      POSTGRES_PASSWORD: fizzbuzz_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./testdata/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata:

@@ -1,0 +1,7 @@
+run:
+  skip-dirs:
+    - go/pkg
+    - /opt/hostedtoolcache
+    - vendor
+  skip-files:
+    - ".*_test.go"
